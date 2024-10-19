@@ -6,6 +6,14 @@ public class ElementWrap<E> {
     private int defaultSize = 5;
     private E[] valueContainer = (E[]) new Object[defaultSize];
 
+    public void setValue(E[] value) {
+        this.valueContainer = value;
+    }
+
+    public E[] getValueContainer() {
+        return valueContainer;
+    }
+
     public ElementWrap(int defaultSize) {
         this.defaultSize = defaultSize;
     }

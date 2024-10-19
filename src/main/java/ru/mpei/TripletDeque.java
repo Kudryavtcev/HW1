@@ -29,15 +29,16 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
             this.first = new ElementWrap<>(maxContainerSize);
             this.first.setValueContainer(t, 0);
             this.last = this.first;
-        } else {
+        }
+        else {
             int flag = isEmptyPositionFirst(t);
             if (flag == -1 && currentSize < maxSize) {
-                currentSize++;
                 ElementWrap<T> newEl = new ElementWrap<>(maxContainerSize);
                 newEl.setValueContainer(t, 0);
                 this.first.setPrev(newEl);
                 newEl.setNext(this.first);
                 this.first = newEl;
+                currentSize ++;
             } else if (flag != -1) {
                 for (int i = flag; i > 0; i--) {
                     this.first.setValueContainer(this.first.getValueContainer(i - 1), i);
@@ -247,12 +248,39 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
     public boolean removeFirstOccurrence(Object o) {
         ElementWrap<T> current = first;
         while (current != null) {
-            for (int j = 0; j < current.getDefaultSize(); j++) {
-                if (current.getValueContainer(j) != null && current.getValueContainer(j).equals(o)) {
-                    for (int i = j; i < current.getDefaultSize() - 1; i++) {
-                        current.setValueContainer(current.getValueContainer(i + 1), i);
+            for (int i = 0; i < current.getDefaultSize(); i++) {
+                if (current.getValueContainer(i) != null && current.getValueContainer(i).equals(o)) {
+                    // Сдвигаем элементы влево, начиная с найденного элемента
+                    for (int j = i; j < current.getDefaultSize() - 1; j++) {
+                        current.setValueContainer(current.getValueContainer(j + 1), j);
                     }
-                    current.setValueContainer(null, current.getDefaultSize() - 1);
+                    current.setValueContainer(null, current.getDefaultSize() - 1); // Очищаем последний элемент
+
+                    // Проверяем, стал ли контейнер пустым
+                    if (isContainerEmpty(current)) {
+                        if (current == first) {
+                            first = current.getNext();
+                            if (first != null) {
+                                first.setPrev(null);
+                            } else {
+                                last = null;
+                            }
+                        } else if (current == last) {
+                            last = current.getPrev();
+                            if (last != null) {
+                                last.setNext(null);
+                            } else {
+                                first = null;
+                            }
+                        } else {
+                            current.getPrev().setNext(current.getNext());
+                            current.getNext().setPrev(current.getPrev());
+                            current.setNext(null);
+                            current.setPrev(null);
+                            current.setValue(null);
+                        }
+                        currentSize--;
+                    }
                     return true;
                 }
             }
@@ -335,7 +363,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
     @Override
     public boolean contains(Object o) {
         if (this.first != null) {
-            ElementWrap<T> currentEl = this.first;
+            ElementWrap<T> currentEl = this.last;
             for (int i = 0; i < this.currentSize; i++) {
                 for (int j = 0; j < currentEl.getDefaultSize(); j++) {
                     if (currentEl.getValueContainer(j) != null) {
@@ -443,39 +471,10 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
             current = current.getNext();
         }
         if (current == null) {
-            return new Object[0];
+            return null;
         }
-        Object[] container = new Object[maxContainerSize];
-        for (int i = 0; i < maxContainerSize; i++) {
-            container[i] = current.getValueContainer(i);
-        }
-        return container;
+
+        return current.getValueContainer();
     }
 
-    private class DeqIterator<T> implements Iterator<T> {
-        private ElementWrap<T> currentWrap;
-        private int index;
-
-        public DeqIterator(ElementWrap<T> first) {
-            this.currentWrap = first;
-            this.index = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return currentWrap != null && (index < currentWrap.getDefaultSize() || currentWrap.getNext() != null);
-        }
-
-        @Override
-        public T next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            if (index >= currentWrap.getDefaultSize()) {
-                currentWrap = currentWrap.getNext();
-                index = 0;
-            }
-            return currentWrap.getValueContainer(index++);
-        }
-    }
 }

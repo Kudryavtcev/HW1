@@ -1,14 +1,16 @@
 package ru.mpei;
 
+import ru.mpei.ElementWrap;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class DeqIterator<T> implements Iterator<T> {
+class DeqIterator<T> implements Iterator<T> {
     private ElementWrap<T> currentWrap;
     private int index;
 
-    public DeqIterator(ElementWrap<T> currentWrap) {
-        this.currentWrap = currentWrap;
+    public DeqIterator(ElementWrap<T> first) {
+        this.currentWrap = first;
         this.index = 0;
     }
 
@@ -20,7 +22,7 @@ public class DeqIterator<T> implements Iterator<T> {
     @Override
     public T next() {
         if (!hasNext()) {
-            throw new NoSuchElementException("There has no elements or deque has ended");
+            throw new NoSuchElementException();
         }
         if (index >= currentWrap.getDefaultSize()) {
             currentWrap = currentWrap.getNext();

@@ -250,13 +250,11 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         while (current != null) {
             for (int i = 0; i < current.getDefaultSize(); i++) {
                 if (current.getValueContainer(i) != null && current.getValueContainer(i).equals(o)) {
-                    // Сдвигаем элементы влево, начиная с найденного элемента
                     for (int j = i; j < current.getDefaultSize() - 1; j++) {
                         current.setValueContainer(current.getValueContainer(j + 1), j);
                     }
-                    current.setValueContainer(null, current.getDefaultSize() - 1); // Очищаем последний элемент
+                    current.setValueContainer(null, current.getDefaultSize() - 1);
 
-                    // Проверяем, стал ли контейнер пустым
                     if (isContainerEmpty(current)) {
                         if (current == first) {
                             first = current.getNext();
